@@ -2400,13 +2400,13 @@ with tab_export:
         )
     else:
         if st.session_state.get("stored_sample_bytes") is not None:
-        export_uploaded = NamedBytesIO(
-            st.session_state["stored_sample_bytes"],
-            st.session_state.get("stored_sample_name") or "uploaded_sample.wav",
-        )
-        sample_audio, sample_status = read_audio_upload(export_uploaded)
-    else:
-        sample_audio, sample_status = read_audio_upload(uploaded) if "uploaded" in locals() else (None, "No sample uploaded.")
+            export_uploaded = NamedBytesIO(
+                st.session_state["stored_sample_bytes"],
+                st.session_state.get("stored_sample_name") or "uploaded_sample.wav",
+            )
+            sample_audio, sample_status = read_audio_upload(export_uploaded)
+        else:
+            sample_audio, sample_status = read_audio_upload(uploaded) if "uploaded" in locals() else (None, "No sample uploaded.")
 
     st.markdown("""
     <div class="panel">
