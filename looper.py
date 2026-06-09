@@ -472,6 +472,55 @@ div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructio
     opacity: 1 !important;
 }
 
+
+/* --- Final uploader readability fix v1.7.2 --- */
+/* Hide Streamlit's unreadable white uploaded-file chip on Cloud */
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
+div[data-testid="stFileUploader"] ul,
+div[data-testid="stFileUploader"] li {
+    display: none !important;
+}
+
+/* Keep the dropzone itself dark and readable */
+div[data-testid="stFileUploader"],
+div[data-testid="stFileUploader"] section,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
+    background: #050914 !important;
+    color: #ffffff !important;
+    border-color: rgba(110,231,255,0.65) !important;
+}
+
+/* Force every remaining uploader text element readable */
+div[data-testid="stFileUploader"] *,
+div[data-testid="stFileUploader"] label,
+div[data-testid="stFileUploader"] p,
+div[data-testid="stFileUploader"] span,
+div[data-testid="stFileUploader"] small,
+div[data-testid="stFileUploader"] button,
+div[data-testid="stFileUploader"] button * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Custom readable file status panel */
+.upload-status-card {
+    border: 1px solid rgba(110,231,255,0.35);
+    background: linear-gradient(135deg, rgba(7,16,31,0.96), rgba(18,9,29,0.92));
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin: 12px 0 16px 0;
+    color: #ffffff !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.24);
+}
+
+.upload-status-card b {
+    color: #6ee7ff !important;
+}
+
+.upload-status-card span {
+    color: #f7fbff !important;
+}
+
 </style>
     """,
     unsafe_allow_html=True,
@@ -2386,4 +2435,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.7.1 — Sample Pool is optional, and upload chip lettering contrast was improved.")
+st.caption("PadLoop Lab v1.7.2 — fixed unreadable Streamlit upload chip by hiding it and adding a readable loaded-file status panel.")
