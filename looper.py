@@ -24,6 +24,14 @@ APP_SUBTITLE = "Sample-to-pad looper + MIDI note engine for techno, house, ambie
 SAMPLE_RATE = 44100
 
 
+class NamedBytesIO(io.BytesIO):
+    """BytesIO with a .name attribute so the existing audio readers can detect file type."""
+    def __init__(self, data: bytes, name: str):
+        super().__init__(data)
+        self.name = name
+
+
+
 # -----------------------------
 # Page setup
 # -----------------------------
@@ -519,6 +527,34 @@ div[data-testid="stFileUploader"] button * {
 
 .upload-status-card span {
     color: #f7fbff !important;
+}
+
+
+/* --- Replace Streamlit upload chip with our own readable panel v1.7.3 --- */
+.custom-loaded-sample-card {
+    border: 1px solid rgba(110,231,255,0.42);
+    background: linear-gradient(135deg, rgba(5,9,20,0.98), rgba(18,9,29,0.94));
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin: 12px 0 16px 0;
+    color: #ffffff !important;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+}
+
+.custom-loaded-sample-card h4 {
+    color: #ffffff !important;
+    margin: 0 0 8px 0;
+    font-size: 1.05rem;
+}
+
+.custom-loaded-sample-card b {
+    color: #6ee7ff !important;
+}
+
+.custom-loaded-sample-card span,
+.custom-loaded-sample-card p {
+    color: #f7fbff !important;
+    opacity: 1 !important;
 }
 
 </style>
@@ -2161,6 +2197,13 @@ if randomize:
 
 notes = generate_pad_notes(root, scale_name, progression_name, bars, density, octave_shift)
 
+
+if "stored_sample_bytes" not in st.session_state:
+    st.session_state["stored_sample_bytes"] = None
+if "stored_sample_name" not in st.session_state:
+    st.session_state["stored_sample_name"] = None
+
+
 metrics = st.columns(5)
 metrics[0].metric("Tempo", f"{bpm} BPM")
 metrics[1].metric("Length", f"{bars} bars")
@@ -2225,12 +2268,44 @@ with tab_sample:
     </div>
     """, unsafe_allow_html=True)
 
-    uploaded = st.file_uploader(
-        "Drag and drop a WAV, AIF, AIFF, MP3, MP4, or M4A sample here, or click Browse Files",
-        type=["wav", "aif", "aiff", "mp3", "mp4", "m4a"],
-        accept_multiple_files=False,
-        help="Drag a WAV, AIF, AIFF, MP3, MP4, or M4A file from Finder directly onto this uploader. MP3/MP4/M4A decoding requires pydub and ffmpeg.",
-    )
+    uploaded = None
+
+    if st.session_state.get("stored_sample_bytes") is None:
+        uploaded = st.file_uploader(
+            "Drag and drop a WAV, AIF, AIFF, MP3, MP4, or M4A sample here, or click Browse Files",
+            type=["wav", "aif", "aiff", "mp3", "mp4", "m4a"],
+            accept_multiple_files=False,
+            help="Drag a WAV, AIF, AIFF, MP3, MP4, or M4A file from Finder directly onto this uploader. MP3/MP4/M4A decoding requires pydub and ffmpeg.",
+            key="sample_upload_widget",
+        )
+
+        if uploaded is not None:
+            st.session_state["stored_sample_bytes"] = uploaded.getvalue()
+            st.session_state["stored_sample_name"] = uploaded.name
+            st.rerun()
+
+    if st.session_state.get("stored_sample_bytes") is not None:
+        uploaded = NamedBytesIO(
+            st.session_state["stored_sample_bytes"],
+            st.session_state.get("stored_sample_name") or "uploaded_sample.wav",
+        )
+
+        st.markdown(
+            f"""
+            <div class="custom-loaded-sample-card">
+                <h4>Loaded sample</h4>
+                <p><b>File:</b> <span>{st.session_state.get("stored_sample_name")}</span></p>
+                <p><b>Status:</b> <span>Sample is stored in this session. The Streamlit upload chip is hidden to avoid invisible lettering.</span></p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if st.button("Change / remove uploaded sample", use_container_width=True):
+            st.session_state["stored_sample_bytes"] = None
+            st.session_state["stored_sample_name"] = None
+            st.rerun()
+
     sample_audio, sample_status = read_audio_upload(uploaded)
 
     if sample_source_choice == "Sample Pool":
@@ -2323,6 +2398,13 @@ with tab_export:
             built_in_duration,
             built_in_tone,
         )
+    else:
+        if st.session_state.get("stored_sample_bytes") is not None:
+        export_uploaded = NamedBytesIO(
+            st.session_state["stored_sample_bytes"],
+            st.session_state.get("stored_sample_name") or "uploaded_sample.wav",
+        )
+        sample_audio, sample_status = read_audio_upload(export_uploaded)
     else:
         sample_audio, sample_status = read_audio_upload(uploaded) if "uploaded" in locals() else (None, "No sample uploaded.")
 
@@ -2435,4 +2517,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.7.2 — fixed unreadable Streamlit upload chip by hiding it and adding a readable loaded-file status panel.")
+st.caption("PadLoop Lab v1.7.3 — uploaded samples are stored in session state and shown with a custom readable loaded-sample panel.")
