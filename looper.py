@@ -1925,6 +1925,68 @@ def render_pad_audio(
     return output.getvalue()
 
 
+
+# --- Built-in oscillator samples ---
+def generate_builtin_sample(
+    waveform: str,
+    root: str,
+    octave: int,
+    duration_seconds: float,
+    tone: float,
+) -> Tuple[np.ndarray, str]:
+    """Generate a built-in mono sample source so users do not need to upload audio."""
+    duration_seconds = max(0.25, min(12.0, float(duration_seconds)))
+    total_samples = int(SAMPLE_RATE * duration_seconds)
+    t = np.linspace(0, duration_seconds, total_samples, endpoint=False)
+
+    midi_note = ROOT_TO_MIDI[root] + (int(octave) - 4) * 12
+    frequency = midi_to_frequency(midi_note)
+    phase = frequency * t
+
+    if waveform == "Sine":
+        audio = np.sin(2 * np.pi * phase)
+    elif waveform == "Triangle":
+        audio = (2.0 / np.pi) * np.arcsin(np.sin(2 * np.pi * phase))
+    elif waveform == "Square":
+        audio = np.sign(np.sin(2 * np.pi * phase))
+    elif waveform == "Sawtooth":
+        audio = 2.0 * (phase - np.floor(phase + 0.5))
+    elif waveform == "Sub Sine":
+        audio = (
+            0.72 * np.sin(2 * np.pi * phase * 0.5)
+            + 0.28 * np.sin(2 * np.pi * phase)
+        )
+    elif waveform == "Noise Texture":
+        rng = np.random.default_rng(404)
+        audio = rng.normal(0, 0.45, total_samples).astype(np.float32)
+        audio = one_pole_lowpass(audio, 350 + tone * 3800)
+        audio += 0.18 * np.sin(2 * np.pi * phase)
+    else:
+        audio = np.sin(2 * np.pi * phase)
+
+    audio = np.nan_to_num(audio.astype(np.float32))
+
+    # Simple tone shaping and anti-harshness.
+    if waveform in ["Square", "Sawtooth", "Noise Texture"]:
+        cutoff = 500 + tone * 5200
+        audio = one_pole_lowpass(audio, cutoff)
+
+    # Soft fade to avoid clicks.
+    fade_size = min(len(audio) // 5, int(SAMPLE_RATE * 0.035))
+    if fade_size > 8:
+        fade_in = np.linspace(0.0, 1.0, fade_size, dtype=np.float32)
+        fade_out = np.linspace(1.0, 0.0, fade_size, dtype=np.float32)
+        audio[:fade_size] *= fade_in
+        audio[-fade_size:] *= fade_out
+
+    peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
+    if peak > 0:
+        audio = audio / peak
+
+    label = f"Built-in {waveform}: {root}{octave}, {frequency:.2f} Hz, {duration_seconds:.2f} sec."
+    return audio.astype(np.float32), label
+
+
 # -----------------------------
 # UI
 # -----------------------------
@@ -1962,7 +2024,21 @@ with st.sidebar:
     pump = st.slider("Club Pump", 0.0, 0.85, 0.22)
 
     st.markdown("### ◎ Sampler Source")
-    use_sampler = st.checkbox("Use uploaded WAV as sound source", value=True)
+    use_sampler = st.checkbox("Use sampler/audio source", value=True)
+    sample_source_choice = st.radio(
+        "Sample Source",
+        ["Built-in Wave", "Upload Your Own"],
+        index=0,
+        help="Use a built-in oscillator sample, or upload your own audio file.",
+    )
+    built_in_waveform = st.selectbox(
+        "Built-in Sample Wave",
+        ["Sine", "Triangle", "Square", "Sawtooth", "Sub Sine", "Noise Texture"],
+        index=0,
+    )
+    built_in_octave = st.slider("Built-in Wave Octave", 1, 5, 2)
+    built_in_duration = st.slider("Built-in Wave Length", 0.25, 8.0, 2.0, step=0.25)
+    built_in_tone = st.slider("Built-in Wave Tone", 0.0, 1.0, 0.55)
     sample_playback_style = st.radio(
         "Sample Playback Style",
         ["Freeze Pad", "MIDI Clip Sampler", "Hybrid"],
@@ -2047,23 +2123,43 @@ with tab_sample:
     st.markdown("""
     <div class="panel">
         <h3>Real Sampler Engine</h3>
-        <p style="color:#aeb9d6;">Upload or drag-and-drop a WAV, AIF, or AIFF sample, then PadLoop Lab will use the MIDI chords above to re-pitch, layer, and loop that sample into a playable pad bed.</p>
+        <p style="color:#aeb9d6;">Choose a built-in wave or upload/drag-and-drop your own sample. PadLoop Lab will use the MIDI chords above to re-pitch, layer, and loop that audio into a playable pad bed.</p>
     </div>
     <div class="drop-zone-panel">
         <h3>⇣ Drag & Drop Sample Zone</h3>
-        <p>Drop a <b>WAV, AIF, or AIFF</b> file onto the uploader below, or click Browse Files. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
+        <p>Use the built-in wave source, or drop a <b>WAV, AIF, AIFF, MP3, MP4, or M4A</b> file onto the uploader below. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
     </div>
     """, unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
-        "Drag and drop a WAV, AIF, or AIFF sample here, or click Browse Files",
-        type=["wav", "aif", "aiff"],
+        "Drag and drop a WAV, AIF, AIFF, MP3, MP4, or M4A sample here, or click Browse Files",
+        type=["wav", "aif", "aiff", "mp3", "mp4", "m4a"],
         accept_multiple_files=False,
-        help="Drag a WAV, AIF, or AIFF file from Finder directly onto this uploader. The uploaded sample becomes the sound source for Freeze Pad, MIDI Clip Sampler, and Hybrid modes.",
+        help="Drag a WAV, AIF, AIFF, MP3, MP4, or M4A file from Finder directly onto this uploader. MP3/MP4/M4A decoding requires pydub and ffmpeg.",
     )
     sample_audio, sample_status = read_audio_upload(uploaded)
 
-    if uploaded:
+    if sample_source_choice == "Built-in Wave":
+        sample_audio, sample_status = generate_builtin_sample(
+            built_in_waveform,
+            root,
+            built_in_octave,
+            built_in_duration,
+            built_in_tone,
+        )
+        browser_preview_bytes = audio_to_wav_bytes(sample_audio)
+        show_interactive_waveform_player(browser_preview_bytes, f"Built-in sample source — {built_in_waveform}", loop_audio)
+        st.success(sample_status)
+        st.markdown(
+            f"""
+            <div class="panel">
+                <h3>Built-in sampler source is active</h3>
+                <p style="color:#aeb9d6;">You are using a built-in <b>{built_in_waveform}</b> wave instead of uploading a sample. Current sampler style: <b>{sample_playback_style}</b>. This built-in wave can still be played by the MIDI engine, frozen into pads, or used as the base sound for future slicer/performance modes.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    elif uploaded:
         if sample_audio is not None:
             browser_preview_bytes = audio_to_wav_bytes(sample_audio)
             show_interactive_waveform_player(browser_preview_bytes, "Original uploaded sample", loop_audio)
@@ -2080,7 +2176,7 @@ with tab_sample:
         else:
             st.error(sample_status)
     else:
-        st.info("Upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short WAV/AIF/AIFF. Then go to Export to generate the sample-based pad loop.")
+        st.info("Use a built-in wave source, or upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short audio file. Then go to Export to generate the sample-based pad loop.")
 
     st.markdown("""
     <div class="panel">
@@ -2120,7 +2216,16 @@ with tab_export:
     </div>
     """, unsafe_allow_html=True)
 
-    sample_audio, sample_status = read_audio_upload(uploaded) if "uploaded" in locals() else (None, "No sample uploaded.")
+    if sample_source_choice == "Built-in Wave":
+        sample_audio, sample_status = generate_builtin_sample(
+            built_in_waveform,
+            root,
+            built_in_octave,
+            built_in_duration,
+            built_in_tone,
+        )
+    else:
+        sample_audio, sample_status = read_audio_upload(uploaded) if "uploaded" in locals() else (None, "No sample uploaded.")
 
     st.markdown("""
     <div class="panel">
@@ -2231,4 +2336,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.6.2 — renamed House Organ Pad to Micronaut in Detroit for a smoother house identity.")
+st.caption("PadLoop Lab v1.7 — added built-in wave sample sources so users can use sine, triangle, square, sawtooth, sub sine, or noise without uploading audio.")
