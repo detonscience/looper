@@ -250,7 +250,94 @@ st.markdown(
     .mono {
         font-family: 'JetBrains Mono', monospace !important;
     }
-    </style>
+    
+/* --- Emergency Streamlit Cloud contrast fix v1.6.1 --- */
+html, body, [class*="css"], [data-testid="stAppViewContainer"] {
+    color: #f7fbff !important;
+}
+
+[data-testid="stAppViewContainer"] label,
+[data-testid="stAppViewContainer"] p,
+[data-testid="stAppViewContainer"] span,
+[data-testid="stAppViewContainer"] div,
+[data-testid="stAppViewContainer"] small {
+    color: #f7fbff !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stSidebar"] {
+    background: #07101f !important;
+}
+
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] small {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+[data-baseweb="select"],
+[data-baseweb="select"] *,
+[data-baseweb="popover"],
+[data-baseweb="popover"] *,
+[role="listbox"],
+[role="listbox"] *,
+[role="option"],
+[role="option"] * {
+    color: #ffffff !important;
+    background-color: #07101f !important;
+    opacity: 1 !important;
+}
+
+input,
+textarea,
+button {
+    color: #ffffff !important;
+}
+
+.stSlider,
+.stSlider *,
+.stRadio,
+.stRadio *,
+.stCheckbox,
+.stCheckbox *,
+.stSelectbox,
+.stSelectbox *,
+.stFileUploader,
+.stFileUploader *,
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stMetric"],
+[data-testid="stMetric"] *,
+[data-testid="stMarkdownContainer"],
+[data-testid="stMarkdownContainer"] * {
+    color: #f7fbff !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stDataFrame"] *,
+[data-testid="stDataEditor"] * {
+    color: #06101c !important;
+}
+
+[data-testid="stDataFrame"] [role="columnheader"] *,
+[data-testid="stDataEditor"] [role="columnheader"] * {
+    color: #ffffff !important;
+}
+
+.stTabs [data-baseweb="tab"],
+.stTabs [data-baseweb="tab"] * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+</style>
     """,
     unsafe_allow_html=True,
 )
