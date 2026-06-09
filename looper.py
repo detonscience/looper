@@ -462,7 +462,7 @@ MODE_DESCRIPTIONS = {
     "Dub Chord Cloud": "Turns notes into smoky filtered chords with delay-friendly long tails.",
     "Ambient Freeze": "Creates long frozen drones from MIDI notes and future sample freeze points.",
     "IDM Fragment": "Breaks notes into unstable micro-loops, reverse ghosts, and pitch scatter.",
-    "Deep House Velvet": "Warm David Alvarado / deep house inspired pad bed with soft pump and smooth sample tone.",
+    "Micronaut in Detroit": "Warm David Alvarado / deep house inspired pad bed with soft pump and smooth sample tone.",
     "Techno Pressure": "Dark pressure layer for warehouse techno, rumble, and low-mid movement.",
 }
 
@@ -1690,7 +1690,7 @@ def render_sample_pad_audio(
         elif mode == "Techno Pressure":
             sub = np.sin(2 * np.pi * note.frequency * 0.25 * nt).astype(np.float32) * 0.07
             layer = layer + sub * env
-        elif mode == "Deep House Velvet":
+        elif mode == "Micronaut in Detroit":
             layer = soft_clip(layer, 1.2 + warmth)
 
         pan = random.Random(note.midi + 99).uniform(-width, width)
@@ -1788,7 +1788,7 @@ def render_midi_triggered_sample_audio(
             layer = one_pole_lowpass(layer, 600 + warmth * 2600)
         elif mode == "Techno Pressure":
             layer = one_pole_lowpass(layer, 500 + warmth * 2400)
-        elif mode == "Deep House Velvet":
+        elif mode == "Micronaut in Detroit":
             layer = soft_clip(layer, 1.15 + warmth)
 
         layer = layer * env * (note.velocity / 127.0)
@@ -1852,7 +1852,7 @@ def render_pad_audio(
         "Dub Chord Cloud": 0.004,
         "Ambient Freeze": 0.002,
         "IDM Fragment": 0.012,
-        "Deep House Velvet": 0.003,
+        "Micronaut in Detroit": 0.003,
         "Techno Pressure": 0.006,
     }.get(mode, 0.004)
 
@@ -1888,7 +1888,7 @@ def render_pad_audio(
             tone += 0.14 * np.sin(2 * np.pi * (f * 0.25) * nt) * env
         elif mode == "Dub Chord Cloud":
             tone += 0.10 * np.sin(2 * np.pi * (f * 0.999) * nt + np.sin(nt * 0.2)) * env
-        elif mode == "Deep House Velvet":
+        elif mode == "Micronaut in Detroit":
             tone = np.sign(tone) * np.sqrt(np.abs(tone)) * env
 
         pan = random.Random(note.midi).uniform(-width, width)
@@ -2231,4 +2231,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.6.2 — renamed House Organ Pad to Deep House Velvet for a smoother house identity.")
+st.caption("PadLoop Lab v1.6.2 — renamed House Organ Pad to Micronaut in Detroit for a smoother house identity.")
