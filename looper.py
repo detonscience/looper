@@ -12,19 +12,11 @@ import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
 
-
 try:
     import mido
     MIDO_AVAILABLE = True
 except Exception:
     MIDO_AVAILABLE = False
-
-try:
-    from pydub import AudioSegment
-    PYDUB_AVAILABLE = True
-except Exception:
-    AudioSegment = None
-    PYDUB_AVAILABLE = False
 
 
 APP_TITLE = "PadLoop Lab"
@@ -247,92 +239,191 @@ st.markdown(
         color: #6ee7ff !important;
     }
 
+    /* High-contrast Streamlit overrides for sidebar, labels, tables, captions, and upload widgets */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #07101f 0%, #0b1224 55%, #12091d 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.14) !important;
+    }
+
+    section[data-testid="stSidebar"] * {
+        color: #f6f9ff !important;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] div {
+        color: #f6f9ff !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+
+    section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"],
+    section[data-testid="stSidebar"] .stSlider span,
+    section[data-testid="stSidebar"] .stSlider label,
+    section[data-testid="stSidebar"] .stRadio label,
+    section[data-testid="stSidebar"] .stCheckbox label {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="select"] > div,
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] textarea {
+        background: #070b16 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(110,231,255,0.42) !important;
+        box-shadow: 0 0 0 1px rgba(110,231,255,0.10) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="select"] span,
+    section[data-testid="stSidebar"] [data-baseweb="select"] div {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    section[data-testid="stSidebar"] [role="radiogroup"] label,
+    section[data-testid="stSidebar"] [role="radiogroup"] span,
+    section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] label,
+    section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        font-weight: 700 !important;
+    }
+
+    div[data-testid="stCaptionContainer"],
+    div[data-testid="stCaptionContainer"] p,
+    div[data-testid="stCaptionContainer"] span {
+        color: #dfe8ff !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border: 1px solid rgba(255,255,255,0.16) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    div[data-testid="stDataFrame"] * {
+        color: #06101c !important;
+    }
+
+    div[data-testid="stDataFrame"] [role="columnheader"] * {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+
+    [data-testid="stMetric"] label,
+    [data-testid="stMetric"] p,
+    [data-testid="stMetric"] span {
+        color: #eaf0ff !important;
+        opacity: 1 !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+        text-shadow: 0 0 18px rgba(110,231,255,0.20) !important;
+    }
+
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    .stFileUploader,
+    .stFileUploader * {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    .stFileUploader section {
+        background: rgba(5,8,18,0.72) !important;
+        border: 1px dashed rgba(110,231,255,0.50) !important;
+        border-radius: 18px !important;
+    }
+
+    .stFileUploader button {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, rgba(110,231,255,0.24), rgba(255,102,196,0.22)) !important;
+        border: 1px solid rgba(255,255,255,0.22) !important;
+        font-weight: 800 !important;
+    }
+
     .mono {
         font-family: 'JetBrains Mono', monospace !important;
     }
     
-/* --- Emergency Streamlit Cloud contrast fix v1.6.1 --- */
-html, body, [class*="css"], [data-testid="stAppViewContainer"] {
-    color: #f7fbff !important;
+/* --- Streamlit Cloud uploader white-box fix v1.6.1 --- */
+div[data-testid="stFileUploader"] {
+    background: rgba(5,8,18,0.90) !important;
+    border: 1px solid rgba(110,231,255,0.42) !important;
+    border-radius: 18px !important;
+    padding: 10px !important;
 }
 
-[data-testid="stAppViewContainer"] label,
-[data-testid="stAppViewContainer"] p,
-[data-testid="stAppViewContainer"] span,
-[data-testid="stAppViewContainer"] div,
-[data-testid="stAppViewContainer"] small {
-    color: #f7fbff !important;
-    opacity: 1 !important;
-}
-
-[data-testid="stSidebar"] {
+div[data-testid="stFileUploader"] section,
+div[data-testid="stFileUploader"] section > div,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
     background: #07101f !important;
+    color: #ffffff !important;
+    border: 1px dashed rgba(110,231,255,0.65) !important;
+    border-radius: 16px !important;
 }
 
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div,
-[data-testid="stSidebar"] small {
+div[data-testid="stFileUploader"] label,
+div[data-testid="stFileUploader"] p,
+div[data-testid="stFileUploader"] span,
+div[data-testid="stFileUploader"] small,
+div[data-testid="stFileUploader"] div {
     color: #ffffff !important;
     opacity: 1 !important;
 }
 
-[data-baseweb="select"],
-[data-baseweb="select"] *,
-[data-baseweb="popover"],
-[data-baseweb="popover"] *,
-[role="listbox"],
-[role="listbox"] *,
-[role="option"],
-[role="option"] * {
+div[data-testid="stFileUploader"] button,
+div[data-testid="stFileUploader"] button span,
+div[data-testid="stFileUploader"] [role="button"],
+div[data-testid="stFileUploader"] [role="button"] * {
     color: #ffffff !important;
-    background-color: #07101f !important;
+    background: linear-gradient(135deg, rgba(110,231,255,0.30), rgba(255,102,196,0.26)) !important;
+    border: 1px solid rgba(255,255,255,0.26) !important;
+    border-radius: 12px !important;
+    font-weight: 900 !important;
     opacity: 1 !important;
 }
 
-input,
-textarea,
-button {
-    color: #ffffff !important;
-}
-
-.stSlider,
-.stSlider *,
-.stRadio,
-.stRadio *,
-.stCheckbox,
-.stCheckbox *,
-.stSelectbox,
-.stSelectbox *,
-.stFileUploader,
-.stFileUploader *,
-[data-testid="stWidgetLabel"],
-[data-testid="stWidgetLabel"] * {
-    color: #ffffff !important;
+div[data-testid="stFileUploader"] svg,
+div[data-testid="stFileUploader"] svg * {
+    color: #6ee7ff !important;
+    fill: #6ee7ff !important;
+    stroke: #6ee7ff !important;
     opacity: 1 !important;
 }
 
-[data-testid="stMetric"],
-[data-testid="stMetric"] *,
-[data-testid="stMarkdownContainer"],
-[data-testid="stMarkdownContainer"] * {
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"],
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] *,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"],
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] * {
     color: #f7fbff !important;
     opacity: 1 !important;
 }
 
-[data-testid="stDataFrame"] *,
-[data-testid="stDataEditor"] * {
-    color: #06101c !important;
-}
-
-[data-testid="stDataFrame"] [role="columnheader"] *,
-[data-testid="stDataEditor"] [role="columnheader"] * {
+div[data-testid="stAlert"] {
+    background: rgba(10,18,38,0.96) !important;
     color: #ffffff !important;
+    border: 1px solid rgba(110,231,255,0.25) !important;
 }
 
-.stTabs [data-baseweb="tab"],
-.stTabs [data-baseweb="tab"] * {
+div[data-testid="stAlert"] *,
+div[data-testid="stNotification"] *,
+div[data-testid="stStatusWidget"] * {
     color: #ffffff !important;
     opacity: 1 !important;
 }
@@ -1478,64 +1569,13 @@ def read_aiff_upload(uploaded_file) -> Tuple[Optional[np.ndarray], str]:
     return audio, f"Loaded sample: {channels} channel(s), {source_rate} Hz, {bit_depth_label}, {len(audio) / SAMPLE_RATE:.2f} sec."
 
 
-
-
-def read_pydub_audio_upload(uploaded_file) -> Tuple[Optional[np.ndarray], str]:
-    """Read MP3/MP4/M4A style uploads using pydub + ffmpeg when available."""
-    if uploaded_file is None:
-        return None, "No sample uploaded."
-
-    if not PYDUB_AVAILABLE:
-        return None, "MP3/MP4/M4A support needs pydub. Install with: python3 -m pip install pydub. You may also need ffmpeg installed on the Mac."
-
-    name = getattr(uploaded_file, "name", "audio").lower()
-    if name.endswith(".mp3"):
-        file_format = "mp3"
-    elif name.endswith(".m4a"):
-        file_format = "m4a"
-    elif name.endswith(".mp4"):
-        file_format = "mp4"
-    else:
-        file_format = None
-
-    try:
-        uploaded_file.seek(0)
-        raw_data = uploaded_file.read()
-        segment = AudioSegment.from_file(io.BytesIO(raw_data), format=file_format)
-        channels = segment.channels
-        source_rate = segment.frame_rate
-        sample_width = segment.sample_width
-
-        segment = segment.set_channels(1)
-        if segment.frame_rate != SAMPLE_RATE:
-            segment = segment.set_frame_rate(SAMPLE_RATE)
-
-        samples = np.array(segment.get_array_of_samples()).astype(np.float32)
-        scale = float(2 ** (8 * segment.sample_width - 1))
-        if scale <= 0:
-            scale = 32768.0
-        audio = samples / scale
-        audio = np.nan_to_num(audio.astype(np.float32))
-        audio = audio - float(np.mean(audio))
-        peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
-        if peak > 0:
-            audio = audio / peak
-
-        ext_label = file_format.upper() if file_format else "compressed audio"
-        return audio, f"Loaded sample: {channels} channel(s), {source_rate} Hz, {sample_width * 8}-bit decoded {ext_label}, {len(audio) / SAMPLE_RATE:.2f} sec."
-    except Exception as exc:
-        return None, f"Could not decode this MP3/MP4/M4A file. Install/check ffmpeg, then try again. Details: {exc}"
-
-
 def read_audio_upload(uploaded_file) -> Tuple[Optional[np.ndarray], str]:
-    """Read WAV, AIF, AIFF, MP3, MP4, or M4A uploads into mono float32 audio for the sampler."""
+    """Read WAV, AIF, or AIFF uploads into mono float32 audio for the sampler."""
     if uploaded_file is None:
         return None, "No sample uploaded."
     name = getattr(uploaded_file, "name", "").lower()
     if name.endswith((".aif", ".aiff")):
         return read_aiff_upload(uploaded_file)
-    if name.endswith((".mp3", ".mp4", ".m4a")):
-        return read_pydub_audio_upload(uploaded_file)
     return read_wav_upload(uploaded_file)
 
 
@@ -1604,7 +1644,6 @@ def render_sample_pad_audio(
     freeze_position: float,
     grain_ms: int,
     root: str,
-    sample_pitch_shift: int = 0,
 ) -> bytes:
     """Render a real sample-based pad loop guided by generated MIDI notes."""
     seconds_per_bar = 60.0 / bpm * 4.0
@@ -1627,7 +1666,7 @@ def render_sample_pad_audio(
         if length <= 0:
             continue
 
-        semitones = note.midi - root_midi + sample_pitch_shift
+        semitones = note.midi - root_midi
         layer = pitch_resample_grain(base_grain, semitones, length)
         nt = np.linspace(0, note.length_bars * seconds_per_bar, length, endpoint=False)
 
@@ -1700,7 +1739,6 @@ def render_midi_triggered_sample_audio(
     pump: float,
     root: str,
     hybrid_blur: bool = False,
-    sample_pitch_shift: int = 0,
 ) -> bytes:
     """Render the uploaded sample as if generated MIDI notes are triggering a sampler."""
     seconds_per_bar = 60.0 / bpm * 4.0
@@ -1728,7 +1766,7 @@ def render_midi_triggered_sample_audio(
         if target_length <= 0:
             continue
 
-        semitones = note.midi - root_midi + sample_pitch_shift
+        semitones = note.midi - root_midi
         layer = pitch_resample_grain(clean_sample, semitones, target_length)
         nt = np.linspace(0, note_seconds, target_length, endpoint=False)
 
@@ -1776,126 +1814,6 @@ def render_midi_triggered_sample_audio(
 
     left = soft_clip(left, 1.15 + warmth * 1.7)
     right = soft_clip(right, 1.15 + warmth * 1.7)
-
-    stereo = np.column_stack([left, right])
-    peak = float(np.max(np.abs(stereo))) if len(stereo) else 0.0
-    if peak > 0:
-        stereo = stereo / peak * 0.86
-
-    pcm = (stereo * 32767).astype(np.int16)
-    output = io.BytesIO()
-    with wave.open(output, "wb") as wav_file:
-        wav_file.setnchannels(2)
-        wav_file.setsampwidth(2)
-        wav_file.setframerate(SAMPLE_RATE)
-        wav_file.writeframes(pcm.tobytes())
-    return output.getvalue()
-
-
-
-# --- Slicer sampler mode ---
-def render_sliced_sample_audio(
-    sample: np.ndarray,
-    notes: List[PadNote],
-    bpm: int,
-    bars: int,
-    mode: str,
-    movement: float,
-    warmth: float,
-    width: float,
-    pump: float,
-    root: str,
-    sample_pitch_shift: int = 0,
-    slice_count: int = 16,
-    slice_pattern: str = "Forward",
-) -> bytes:
-    """Render the uploaded sample as rhythmic slices triggered by generated MIDI notes."""
-    seconds_per_bar = 60.0 / bpm * 4.0
-    total_seconds = bars * seconds_per_bar
-    total_samples = int(total_seconds * SAMPLE_RATE)
-    t = np.linspace(0, total_seconds, total_samples, endpoint=False)
-
-    clean_sample = np.nan_to_num(sample.astype(np.float32))
-    if len(clean_sample) < 64:
-        clean_sample = np.zeros(2048, dtype=np.float32)
-
-    slice_count = max(2, min(64, int(slice_count)))
-    slice_len = max(64, len(clean_sample) // slice_count)
-    root_midi = ROOT_TO_MIDI[root] - 12
-
-    left = np.zeros(total_samples, dtype=np.float32)
-    right = np.zeros(total_samples, dtype=np.float32)
-    rng = random.Random(909 + len(clean_sample) + slice_count)
-    ordered_notes = sorted(notes, key=lambda n: (float(n.start_bar), int(n.midi)))
-
-    for index, note in enumerate(ordered_notes):
-        if slice_pattern == "Reverse":
-            slice_index = (slice_count - 1 - index) % slice_count
-        elif slice_pattern == "Random":
-            slice_index = rng.randrange(slice_count)
-        elif slice_pattern == "Odd/Even Jump":
-            slice_index = ((index * 5) + (index % 2) * 3) % slice_count
-        else:
-            slice_index = index % slice_count
-
-        slice_start = slice_index * slice_len
-        slice_end = min(len(clean_sample), slice_start + slice_len)
-        source_slice = clean_sample[slice_start:slice_end].copy()
-        if len(source_slice) < 64:
-            continue
-
-        start_sec = float(note.start_bar) * seconds_per_bar
-        rhythmic_length_bars = max(0.125, min(float(note.length_bars), 0.5 + movement * 1.5))
-        note_seconds = rhythmic_length_bars * seconds_per_bar
-        end_sec = min(total_seconds, start_sec + note_seconds)
-        start_idx = int(start_sec * SAMPLE_RATE)
-        end_idx = int(end_sec * SAMPLE_RATE)
-        target_length = end_idx - start_idx
-        if target_length <= 0:
-            continue
-
-        semitones = note.midi - root_midi + sample_pitch_shift
-        layer = pitch_resample_grain(source_slice, semitones, target_length)
-        nt = np.linspace(0, note_seconds, target_length, endpoint=False)
-
-        attack = max(1, int(0.008 * SAMPLE_RATE))
-        release = max(1, int((0.08 + movement * 0.20) * SAMPLE_RATE))
-        env = np.ones(target_length, dtype=np.float32)
-        env[: min(attack, target_length)] *= np.linspace(0, 1, min(attack, target_length))
-        env[-min(release, target_length):] *= np.linspace(1, 0, min(release, target_length))
-
-        if mode == "IDM Fragment":
-            gate_rate = 6.0 + movement * 28.0
-            gate = (np.sin(2 * np.pi * gate_rate * nt + index) > -0.05).astype(np.float32)
-            layer *= gate
-        elif mode == "Dub Chord Cloud":
-            layer = one_pole_lowpass(layer, 700 + warmth * 1800)
-        elif mode == "Ambient Freeze":
-            layer = one_pole_lowpass(layer, 500 + warmth * 1800)
-        elif mode == "Techno Pressure":
-            layer = one_pole_lowpass(layer, 450 + warmth * 2200)
-            layer = soft_clip(layer, 1.3 + warmth * 1.4)
-        elif mode == "House Organ Pad":
-            layer = soft_clip(layer, 1.1 + warmth)
-
-        layer = layer * env * (note.velocity / 127.0)
-
-        pan = random.Random(note.midi + index + 404).uniform(-width, width)
-        l_gain = math.cos((pan + 1) * math.pi / 4)
-        r_gain = math.sin((pan + 1) * math.pi / 4)
-        left[start_idx:end_idx] += layer * l_gain
-        right[start_idx:end_idx] += layer * r_gain
-
-    beat_phase = (t * bpm / 60.0) % 1.0
-    duck = 1.0 - pump * np.exp(-beat_phase * 8.5)
-    left *= duck
-    right *= duck
-
-    cutoff = 900 + warmth * 3800 + movement * 700
-    left = one_pole_lowpass(left, cutoff)
-    right = one_pole_lowpass(right, cutoff * 1.04)
-    left = soft_clip(left, 1.2 + warmth * 1.8)
-    right = soft_clip(right, 1.2 + warmth * 1.8)
 
     stereo = np.column_stack([left, right])
     peak = float(np.max(np.abs(stereo))) if len(stereo) else 0.0
@@ -2047,17 +1965,14 @@ with st.sidebar:
     use_sampler = st.checkbox("Use uploaded WAV as sound source", value=True)
     sample_playback_style = st.radio(
         "Sample Playback Style",
-        ["Freeze Pad", "MIDI Clip Sampler", "Hybrid", "Slicer"],
+        ["Freeze Pad", "MIDI Clip Sampler", "Hybrid"],
         index=0,
-        help="Freeze Pad turns one sample grain into a pad. MIDI Clip Sampler triggers the uploaded sample from the generated MIDI notes. Hybrid blurs MIDI-triggered notes into a pad. Slicer chops the sample into rhythmic slices.",
+        help="Freeze Pad turns one sample grain into a pad. MIDI Clip Sampler triggers the uploaded sample from the generated MIDI notes. Hybrid triggers the sample but blurs it into a pad.",
     )
     playback_mode = st.radio("Audio Player Mode", ["Loop", "Play once"], index=0, horizontal=True)
     loop_audio = playback_mode == "Loop"
-    sample_pitch_shift = st.slider("Sample Pitch Shift", -24, 24, 0, help="Pitch the uploaded sample before the sampler engine. Negative values create darker hardware-sampler style tones.")
     freeze_position = st.slider("Sample Freeze Position", 0.0, 1.0, 0.42)
     grain_ms = st.slider("Sampler Grain Size", 60, 2000, 420)
-    slice_count = st.select_slider("Slicer Slice Count", options=[4, 8, 12, 16, 24, 32, 48, 64], value=16)
-    slice_pattern = st.selectbox("Slicer Pattern", ["Forward", "Reverse", "Odd/Even Jump", "Random"], index=0)
 
     randomize = st.button("Randomize beautiful pad settings")
 
@@ -2132,19 +2047,19 @@ with tab_sample:
     st.markdown("""
     <div class="panel">
         <h3>Real Sampler Engine</h3>
-        <p style="color:#aeb9d6;">Upload or drag-and-drop a WAV, AIF, AIFF, MP3, MP4, or M4A sample, then PadLoop Lab will use the MIDI chords above to re-pitch, layer, and loop that sample into a playable pad bed.</p>
+        <p style="color:#aeb9d6;">Upload or drag-and-drop a WAV, AIF, or AIFF sample, then PadLoop Lab will use the MIDI chords above to re-pitch, layer, and loop that sample into a playable pad bed.</p>
     </div>
     <div class="drop-zone-panel">
         <h3>⇣ Drag & Drop Sample Zone</h3>
-        <p>Drop a <b>WAV, AIF, AIFF, MP3, MP4, or M4A</b> file onto the uploader below, or click Browse Files. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
+        <p>Drop a <b>WAV, AIF, or AIFF</b> file onto the uploader below, or click Browse Files. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
     </div>
     """, unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
-        "Drag and drop a WAV, AIF, AIFF, MP3, MP4, or M4A sample here, or click Browse Files",
-        type=["wav", "aif", "aiff", "mp3", "mp4", "m4a"],
+        "Drag and drop a WAV, AIF, or AIFF sample here, or click Browse Files",
+        type=["wav", "aif", "aiff"],
         accept_multiple_files=False,
-        help="Drag a WAV, AIF, AIFF, MP3, MP4, or M4A file from Finder directly onto this uploader. MP3/MP4/M4A decoding requires pydub and ffmpeg.",
+        help="Drag a WAV, AIF, or AIFF file from Finder directly onto this uploader. The uploaded sample becomes the sound source for Freeze Pad, MIDI Clip Sampler, and Hybrid modes.",
     )
     sample_audio, sample_status = read_audio_upload(uploaded)
 
@@ -2157,7 +2072,7 @@ with tab_sample:
                 f"""
                 <div class="panel">
                     <h3>Sampler routing is active</h3>
-                    <p style="color:#aeb9d6;">The player above already shows the waveform and moving playhead. Current sampler style: <b>{sample_playback_style}</b>. Sample pitch shift: <b>{sample_pitch_shift:+d} semitones</b>. Freeze Pad grabs a grain around <b>{freeze_position:.0%}</b> using a <b>{grain_ms} ms</b> window. MIDI Clip Sampler triggers the uploaded sample like an instrument. Slicer chops the sample into <b>{slice_count}</b> pieces using the <b>{slice_pattern}</b> pattern.</p>
+                    <p style="color:#aeb9d6;">The player above already shows the waveform and moving playhead. Current sampler style: <b>{sample_playback_style}</b>. Freeze Pad grabs a grain around <b>{freeze_position:.0%}</b> using a <b>{grain_ms} ms</b> window. MIDI Clip Sampler uses the generated MIDI notes to trigger and pitch the uploaded sample like an instrument.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -2165,7 +2080,7 @@ with tab_sample:
         else:
             st.error(sample_status)
     else:
-        st.info("Upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short WAV/AIF/AIFF/MP3/MP4/M4A. Then go to Export to generate the sample-based pad loop.")
+        st.info("Upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short WAV/AIF/AIFF. Then go to Export to generate the sample-based pad loop.")
 
     st.markdown("""
     <div class="panel">
@@ -2249,7 +2164,6 @@ with tab_export:
                 pump,
                 root,
                 hybrid_blur=False,
-                sample_pitch_shift=sample_pitch_shift,
             )
             st.success("Using the generated MIDI notes to trigger and pitch the uploaded sample like a sampler instrument.")
         elif sample_playback_style == "Hybrid":
@@ -2265,26 +2179,8 @@ with tab_export:
                 pump,
                 root,
                 hybrid_blur=True,
-                sample_pitch_shift=sample_pitch_shift,
             )
             st.success("Using the generated MIDI notes to trigger the sample, then blurring it into a pad-like layer.")
-        elif sample_playback_style == "Slicer":
-            wav_bytes = render_sliced_sample_audio(
-                sample_audio,
-                edited_notes,
-                bpm,
-                bars,
-                mode,
-                movement,
-                warmth,
-                width,
-                pump,
-                root,
-                sample_pitch_shift=sample_pitch_shift,
-                slice_count=slice_count,
-                slice_pattern=slice_pattern,
-            )
-            st.success("Using Slicer mode: the sample is chopped into slices and triggered rhythmically by the generated MIDI notes.")
         else:
             wav_bytes = render_sample_pad_audio(
                 sample_audio,
@@ -2299,7 +2195,6 @@ with tab_export:
                 freeze_position,
                 grain_ms,
                 root,
-                sample_pitch_shift=sample_pitch_shift,
             )
             st.success("Using uploaded WAV as a freeze/grain source for this pad loop.")
     else:
@@ -2336,4 +2231,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.5 — Sample Looper now supports WAV, AIF, AIFF, MP3, MP4, and M4A uploads when pydub/ffmpeg are available.")
+st.caption("PadLoop Lab v1.6.1 — fixed Streamlit Cloud uploader white-box contrast and invisible upload lettering.")
