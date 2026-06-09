@@ -428,6 +428,50 @@ div[data-testid="stStatusWidget"] * {
     opacity: 1 !important;
 }
 
+
+/* --- Upload chip / file-name dark-mode fix v1.7.1 --- */
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] *,
+div[data-testid="stFileUploader"] li,
+div[data-testid="stFileUploader"] li *,
+div[data-testid="stFileUploader"] ul,
+div[data-testid="stFileUploader"] ul *,
+div[data-testid="stFileUploader"] [class*="uploadedFile"],
+div[data-testid="stFileUploader"] [class*="uploadedFile"] *,
+div[data-testid="stFileUploader"] [class*="fileName"],
+div[data-testid="stFileUploader"] [class*="fileName"] * {
+    background: #07101f !important;
+    color: #06101c !important;
+    opacity: 1 !important;
+}
+
+/* The actual white chip sometimes uses generic button/span classes on Streamlit Cloud. */
+div[data-testid="stFileUploader"] div[role="button"],
+div[data-testid="stFileUploader"] div[role="button"] *,
+div[data-testid="stFileUploader"] button[kind],
+div[data-testid="stFileUploader"] button[kind] * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* If Streamlit insists on a white file chip, force dark visible text inside it. */
+div[data-testid="stFileUploader"] [style*="background-color: rgb(255"],
+div[data-testid="stFileUploader"] [style*="background-color: rgb(255"] *,
+div[data-testid="stFileUploader"] [style*="background: rgb(255"],
+div[data-testid="stFileUploader"] [style*="background: rgb(255"] * {
+    background: #07101f !important;
+    color: #ffffff !important;
+    border-color: rgba(110,231,255,0.65) !important;
+    opacity: 1 !important;
+}
+
+/* Keep uploader helper text bright but not washed out. */
+div[data-testid="stFileUploader"] small,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] small {
+    color: #cdd8ff !important;
+    opacity: 1 !important;
+}
+
 </style>
     """,
     unsafe_allow_html=True,
@@ -2027,14 +2071,15 @@ with st.sidebar:
     use_sampler = st.checkbox("Use sampler/audio source", value=True)
     sample_source_choice = st.radio(
         "Sample Source",
-        ["Built-in Wave", "Upload Your Own"],
+        ["Upload Your Own", "Sample Pool"],
         index=0,
-        help="Use a built-in oscillator sample, or upload your own audio file.",
+        help="Upload your own audio, or choose a simple built-in wave from the small sample pool.",
     )
     built_in_waveform = st.selectbox(
-        "Built-in Sample Wave",
-        ["Sine", "Triangle", "Square", "Sawtooth", "Sub Sine", "Noise Texture"],
+        "Sample Pool Wave",
+        ["None", "Sine", "Triangle", "Square", "Sawtooth", "Sub Sine", "Noise Texture"],
         index=0,
+        help="Choose None if you do not want a built-in sample. Pick a wave only when you want to use the sample pool.",
     )
     built_in_octave = st.slider("Built-in Wave Octave", 1, 5, 2)
     built_in_duration = st.slider("Built-in Wave Length", 0.25, 8.0, 2.0, step=0.25)
@@ -2127,7 +2172,7 @@ with tab_sample:
     </div>
     <div class="drop-zone-panel">
         <h3>⇣ Drag & Drop Sample Zone</h3>
-        <p>Use the built-in wave source, or drop a <b>WAV, AIF, AIFF, MP3, MP4, or M4A</b> file onto the uploader below. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
+        <p>Choose from the small Sample Pool, or drop a <b>WAV, AIF, AIFF, MP3, MP4, or M4A</b> file onto the uploader below. Chord stabs, synth notes, vocal tones, Rhodes hits, field recordings, noise loops, and texture samples all work.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2139,26 +2184,31 @@ with tab_sample:
     )
     sample_audio, sample_status = read_audio_upload(uploaded)
 
-    if sample_source_choice == "Built-in Wave":
-        sample_audio, sample_status = generate_builtin_sample(
-            built_in_waveform,
-            root,
-            built_in_octave,
-            built_in_duration,
-            built_in_tone,
-        )
-        browser_preview_bytes = audio_to_wav_bytes(sample_audio)
-        show_interactive_waveform_player(browser_preview_bytes, f"Built-in sample source — {built_in_waveform}", loop_audio)
-        st.success(sample_status)
-        st.markdown(
-            f"""
-            <div class="panel">
-                <h3>Built-in sampler source is active</h3>
-                <p style="color:#aeb9d6;">You are using a built-in <b>{built_in_waveform}</b> wave instead of uploading a sample. Current sampler style: <b>{sample_playback_style}</b>. This built-in wave can still be played by the MIDI engine, frozen into pads, or used as the base sound for future slicer/performance modes.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    if sample_source_choice == "Sample Pool":
+        if built_in_waveform == "None":
+            sample_audio = None
+            sample_status = "No sample pool wave selected."
+            st.info("Sample Pool is available, but nothing is selected yet. Choose Sine, Triangle, Square, Sawtooth, Sub Sine, or Noise Texture when you want to use a built-in source.")
+        else:
+            sample_audio, sample_status = generate_builtin_sample(
+                built_in_waveform,
+                root,
+                built_in_octave,
+                built_in_duration,
+                built_in_tone,
+            )
+            browser_preview_bytes = audio_to_wav_bytes(sample_audio)
+            show_interactive_waveform_player(browser_preview_bytes, f"Sample Pool source — {built_in_waveform}", loop_audio)
+            st.success(sample_status)
+            st.markdown(
+                f"""
+                <div class="panel">
+                    <h3>Sample Pool source is active</h3>
+                    <p style="color:#aeb9d6;">You selected <b>{built_in_waveform}</b> from the small sample pool. Current sampler style: <b>{sample_playback_style}</b>. This is only used because you chose it; otherwise the app waits for your uploaded sample.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
     elif uploaded:
         if sample_audio is not None:
             browser_preview_bytes = audio_to_wav_bytes(sample_audio)
@@ -2176,7 +2226,7 @@ with tab_sample:
         else:
             st.error(sample_status)
     else:
-        st.info("Use a built-in wave source, or upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short audio file. Then go to Export to generate the sample-based pad loop.")
+        st.info("Choose from the small Sample Pool, or upload a chord stab, synth note, vocal tone, Rhodes hit, field recording, noise loop, or any short audio file. Then go to Export to generate the sample-based pad loop.")
 
     st.markdown("""
     <div class="panel">
@@ -2216,7 +2266,7 @@ with tab_export:
     </div>
     """, unsafe_allow_html=True)
 
-    if sample_source_choice == "Built-in Wave":
+    if sample_source_choice == "Sample Pool" and built_in_waveform != "None":
         sample_audio, sample_status = generate_builtin_sample(
             built_in_waveform,
             root,
@@ -2336,4 +2386,4 @@ with tab_export:
         else:
             st.warning("Install mido to enable MIDI export: pip install mido")
 
-st.caption("PadLoop Lab v1.7 — added built-in wave sample sources so users can use sine, triangle, square, sawtooth, sub sine, or noise without uploading audio.")
+st.caption("PadLoop Lab v1.7.1 — Sample Pool is optional, and upload chip lettering contrast was improved.")
